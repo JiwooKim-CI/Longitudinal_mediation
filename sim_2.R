@@ -1,11 +1,11 @@
 # the longitudinal mediation model
+
+# Load required packages.
 library(profvis)
 library(tictoc)
 library(plyr)
 library(doParallel)
-cl<-49
-registerDoParallel(cl)
-library(dagitty) # to draw DAGs
+library(dagitty)
 library(raster)
 library(ggplot2)
 library(ggthemes)
@@ -16,10 +16,16 @@ library(data.table)
 library(dplyr)
 library(tidyr)
 library(jtools)
+
+# Setting the number of cores to speed up the analysis
+cl<-49
+registerDoParallel(cl)
+
 setDTthreads(percent = 90)
-#### analytic bias from u1, u2, and u3 (delta_1, delta_2 and delta_3)
-#### 5 grid points will only run on supercomputer
+#### analytic bias from u1, u2
+#### 9 grid points will only run on supercomputer
 #### lower number of gridpoints yield similar results
+
 profvis({
 
 ng <- list()
@@ -34,7 +40,7 @@ ng <- append(-1*ng[[6]],ng)
 ng <- append(-1*ng[[8]],ng)
 ng <- as.numeric(ng)
 
-p_m2_x <- .5 # a path-fixed
+p_m2_x <- .2 # a path-fixed
 p_y2_m2 <- ng 
 p_m2_m1 <- ng 
 p_y2_y1 <- ng 
