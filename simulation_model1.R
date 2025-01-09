@@ -468,8 +468,7 @@ pdf("figure_p11.pdf", height=6, width=6)
 p11
 dev.off()
 
-# Graph under the ignorability assumption
-
+# Graph under the no time varying confounder assumption and ignorability assumption
 
 sim1_ig<- ggplot() +
   geom_smooth(data = graph1_ancova ,aes( x=diff, y = abs(bias_ancova), weight = n), linetype = "solid", color = "black") +
@@ -479,6 +478,83 @@ sim1_ig<- ggplot() +
   geom_smooth(data = graph1_naive, aes(x=diff, y = abs(bias_naive), weight = n),linetype = "dotted", color = "black") +
  labs(x=expression(abs(delta[3]*delta[4])+abs(delta[1]*delta[2])), y="Bias") + 
   theme_apa() 
+
+grid1small1 <- grid1 |> filter(grid1$p_m1_u * grid1$p_m2_u +
+                                 grid1$p_y1_u * grid1$p_y2_u == 0)
+range(grid1small1$diff2)
+
+graph1 <- grid1small1 |>
+  select(bias_ancova, diff, diff2) |>
+  as_tibble() |>
+  round_df(4)
+
+graph1_ancova <- graph1 |>  # Group by all columns
+  group_by(bias_ancova, diff, diff2) |>
+  count()
+graph1_ancova <- graph1_ancova |>
+  mutate(perc = n/nrow(graph1))
+
+graph1 <- grid1small1 |>
+  select(bias_change, bias_naive, diff, diff2) |>
+  as_tibble() |>
+  round_df(4)
+
+graph1_change <- graph1 |>  # Group by all columns
+  group_by(bias_change, diff, diff2) |>
+  count()
+graph1_change <- graph1_change|>
+  mutate(perc = n/nrow(graph1))
+
+
+graph1 <- grid1small1 |>
+  select(bias_change_1, diff, diff2) |>
+  as_tibble() |>
+  round_df(4)
+
+graph1_change_1 <- graph1|> # Group by all columns
+  group_by(bias_change_1, diff, diff2) |>
+  count()
+graph1_change_1 <- graph1_change_1|>
+  mutate(perc = n/nrow(graph1))
+
+graph1 <- grid1small1 |>
+  select(bias_change_2, diff, diff2) |>
+  as_tibble() |>
+  round_df(4)
+
+graph1_change_2 <- graph1 |>  # Group by all columns
+  group_by(bias_change_2, diff, diff2) |>
+  count()
+graph1_change_2 <- graph1_change_2|>
+  mutate(perc = n/nrow(graph1))
+
+
+graph1 <- grid1small1 |>
+  select(bias_naive, diff, diff2) |>
+  as_tibble() |>
+  round_df(4)
+
+graph1_naive <- graph1 |>  # Group by all columns
+  group_by(bias_naive, diff, diff2) |>
+  count()
+graph1_naive<- graph1_naive |>
+  mutate(perc = n/nrow(graph1))
+
+p13 <- ggplot() +
+  geom_vline(xintercept  = 0, linetype = "solid", color = "black")+ ## this yields 0 bias
+  geom_density(data = graph1_change, aes(x=bias_change, weight = perc), linetype = "dashed", color = "red",adjust = 3) +
+  geom_density(data = graph1_change_2, aes(x=bias_change_2, weight = perc), linetype = "dashed", color = "blue",adjust = 3) +
+  geom_density(data = graph1_naive, aes(x=bias_naive, weight = perc),linetype = "dotted",adjust = 3) +
+  geom_density(data = graph1_change_1, aes(x=bias_change_1, weight = perc),linetype = "dashed",color = "purple",adjust = 3) +
+  labs(x="Raw bias", y="Percent") + 
+  xlim(-.3,.3) +
+  ylim(0,40) +
+  theme_apa() 
+
+pdf("figure_p13_sim1_with_color.pdf", height=6, width=6)
+p13
+dev.off()
+
 # Graph under the no time varying confounder assumption and common trend assumption
 grid1small1 <- grid1 |> filter(grid1$p_m1_u == grid1$p_m2_u+grid1$p_m1_u*grid1$p_m2_m1 &
                                  grid1$p_y1_u == grid1$p_y2_u+ grid1$p_y1_u*grid1$p_y2_y1 &
