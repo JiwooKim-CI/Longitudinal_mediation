@@ -1,11 +1,13 @@
 # the longitudinal mediation model
+# This code is written assuming no time-varying confounders assumption
+
+# load packages
 library(tictoc)
 library(plyr)
 library(doParallel)
 cl<-49
 registerDoParallel(cl)
-tic()
-library(dagitty) # to draw DAGs
+library(dagitty) 
 library(ggplot2)
 library(ggthemes)
 library(patchwork)
@@ -21,8 +23,8 @@ library(forestmangr)
 library(dendroTools)
 
 
-#### analytic bias from u1, u2, and u3 (delta_1, delta_2 and delta_3)
-#### 5 grid points will only run on supercomputer
+#### analytic bias from u1
+#### 9 grid points will only run on supercomputer
 #### lower number of gridpoints yield similar results
 ng <- list()
 ng <- append(.1, ng)
@@ -78,9 +80,10 @@ grid1[,`:=`(eps_m1 = sqrt(1-p_m1_u^2),
                             2*p_y2_x*p_m2_x*p_y2_x-
                             2*p_y2_m2*p_m2_m1*(p_y1_m1*p_y2_y1+p_m1_u*p_y2_u+p_m1_u*p_y1_u*p_y2_y1)-
                             2*p_y2_u*p_y1_u*p_y2_y1))]
-
+# use na.omit code to eliminate imaginary number data
 grid1 <- na.omit(grid1)
-# computing estimators
+
+# computing path correlation
 grid1[,`:=`(rm2y2 = p_y2_m2 + 
               p_m2_u*p_y2_u + 
               p_m2_m1*p_y1_m1*p_y2_y1 + 
@@ -110,7 +113,10 @@ grid1[,`:=`(ry1m2.m1 = (ry1m2-rm1y1*rm1m2)/sqrt((1-rm1y1^2)*(1-rm1m2^2)),
             sd_y2.m1 = sqrt(1-rm1y2^2),
             sd_y1.m1 = sqrt(1-rm1y1^2))]
 
+# use na.omit code to eliminate imaginary number data
 grid1 <- na.omit(grid1)
+
+# computing estimators
 grid1[,`:=`(change = p_m2_x*(p_gm_m1*p_m2_m1*p_y2_m2*p_gy_y2 +
                                p_gm_m1*p_y1_m1*p_gy_y1+
                                p_gm_m1*p_y1_m1*p_y2_y1*p_gy_y2+
@@ -167,11 +173,10 @@ grid1[,`:=`(change = p_m2_x*(p_gm_m1*p_m2_m1*p_y2_m2*p_gy_y2 +
                              p_m2_u*p_y1_u*p_y2_y1+
                              p_m2_u*p_y2_u))]
 
-# Convert to a tibble for better display if desired
 
 # computing bias
-grid1[,`:=`(bias_change = change - truth, ### 2 wave change score that ppl usually use
-            bias_change_2 = change_2 - truth, ### 2 wave change score divided by 2
+grid1[,`:=`(bias_change = change - truth, ### 2 wave change score that people usually use
+            bias_change_2 = change_2 - truth, ### 2 wave change score multiplied by 2
             bias_ancova = ancova - truth,
             bias_naive = naive - truth,
             bias_change_1 = change_1 - truth)] ### change score with one pre-test
