@@ -8,7 +8,7 @@ Project Contacts (as of January 2025):Jiwoo Kim, jk2759@cornell.edu
 ## Content
 This repo includes replication files for the simulation on the two-wave longitudinal mediation analysis.
 
-Citation: Thoemmes, Felix & Kim, Yongnam. (2023). Bias and Sensitivity Analyses for Linear Front-Door Models. Methodology. 19. 256-282. 10.5964/meth.9205. 
+Citation: Thoemmes, Felix & Kim, Yongnam. (2023). Bias and sensitivity analyses for linear front-door models. Methodology. 19. 256-282. 10.5964/meth.9205. 
 
 ## Sharing/Access Information
 Files: 
