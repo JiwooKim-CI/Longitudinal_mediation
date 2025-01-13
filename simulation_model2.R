@@ -1,3 +1,7 @@
+# the longitudinal mediation model
+# This code is written assuming time-varying confounders existance
+
+# load packages
 library(profvis)
 library(tictoc)
 library(plyr)
@@ -18,8 +22,10 @@ library(jtools)
 library(cgwtools)
 library(forestmangr)
 library(dendroTools)
-#setDTthreads(percent = 90)
 
+#### analytic bias from u1 and u2
+#### 9 grid points will only run on supercomputer
+#### lower number of gridpoints yield similar results
 ng <- list()
 ng <- append(.1, ng)
 ng <- append(sqrt(ng[[1]]),ng)
@@ -31,6 +37,7 @@ ng <- append(-1*ng[[4]],ng)
 ng <- append(-1*ng[[6]],ng)
 ng <- append(-1*ng[[8]],ng)
 ng <- as.numeric(ng)
+
 p_m2_x <- .2 # a path-fixed
 p_y2_m2 <- ng
 p_m2_m1 <- ng
@@ -48,6 +55,8 @@ p_gy_y1 <- -1
 grid1 <- data_frame()
 grid <- data.table()
 
+# Using data.table here, in the hope that it is faster
+# To reduce the running time, we ran the simulation for each p_y2_x case
 for (i in length(ng)){
   p_y2_x <- ng[[i]]
   grid <- CJ(p_m2_x, p_y2_x, p_y2_m2, p_m2_m1, p_y2_y1, p_y2_u2, p_m2_u2, p_y1_u1,
@@ -70,9 +79,13 @@ for (i in length(ng)){
   grid <- grid[eps_m1>=0 & eps_y1>=0 & eps_m2>=0 & eps_y2>=0]
   grid1 <- rbind(grid1,grid)
 }
-grid1[1:10]
+
+# remove the grid file for faster simulation
 rm(grid)
+
+# use na.omit code to eliminate imaginary number data
 grid1 <- na.omit(grid1)
+
 # computing estimators
 grid1[,`:=`(rm2y2 = p_y2_m2 +
               p_m2_m1 * p_y1_m1 * p_y2_y1 +
@@ -109,8 +122,10 @@ grid1[,`:=`(ry1m2.m1 = (ry1m2-rm1y1*rm1m2)/sqrt((1-rm1y1^2)*(1-rm1m2^2)),
             sd_y2.m1 = sqrt(1-rm1y2^2),
             sd_y1.m1 = sqrt(1-rm1y1^2))]
 
+# use na.omit code to eliminate imaginary number data
 grid1 <- na.omit(grid1)
 
+# computing estimators
 grid1[,`:=`(change = p_m2_x*(p_gm_m1*p_m2_m1*p_y2_m2*p_gy_y2 +
                                p_gm_m1*p_y1_m1*p_y2_y1*p_gy_y2 +
                                p_gm_m1*p_y1_m1*p_y2_y1*p_gy_y1 +
@@ -177,6 +192,7 @@ grid1[,`:=`(bias_change = change - truth,
             bias_naive = naive - truth,
             bias_change_1 = change_1 - truth)]
 
+# Eliminate columns that are used for calculating the bias for the sake of the speed of the code.
 grid1 <- grid1[,-(16:37)]
 
 grid1[,16:20] <- round_df(grid1[,16:20], 4)
