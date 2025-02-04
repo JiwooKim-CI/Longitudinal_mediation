@@ -127,24 +127,30 @@ for (i in 1:3){
   grid <- grid[eps_m1>=0 & eps_y1>=0 & eps_m2>=0 & eps_y2>=0]
   grid1 <- rbind(grid1,grid)
 }
-grid1[1:10]
+
 rm(grid)
 grid1 <- na.omit(grid1)
 
 # computing estimators
 grid1[,`:=`(rm2y2 = p_y2_m2 +
               p_m2_m1 * p_y1_m1 * p_y2_y1 +
+              p_m2_m1 * p_y2_m1 +
               p_m2_m1 * p_m1_u1 * p_u2_u1 * p_y2_u2 +
               p_m2_m1 * p_m1_u1 * p_y1_u1 * p_y2_y1 +
               p_m2_u2 * p_y2_u2 +
-              p_m2_u2 * p_u2_u1 * p_m1_u1 * p_y1_m1 * p_y2_u2 +
+              p_m2_u2 * p_u2_u1 * p_m1_u1 * p_y1_m1 * p_y2_y1 +
+              p_m2_u2 * p_u2_u1 * p_m1_u1 * p_y2_m1 +
               p_m2_u2 * p_u2_u1 * p_y1_u1 * p_y2_y1 +
+              p_m2_x * p_y2_x +
               p_m2_y1 * p_y2_y1 +
-              p_m2_y1 * p_y1_u1 * p_m1_u1 * p_y2_m1 , 
-            rm1m2 = p_m2_m1 + 
-              p_m1_u1 * p_u2_u1 * p_m2_u2 +
-              p_y1_m1 * p_m2_y1 +
-              p_m1_u1 * p_y1_u1 * p_m2_y1,
+              p_m2_y1 * p_y1_m1 * p_y2_m1 +
+              p_m2_y1 * p_y1_m1 * p_m1_u1 * p_u2_u1 * p_y2_u2 +
+              p_m2_y1 * p_y1_u1 * p_m1_u1 * p_y2_m1 +
+              p_m2_y1 * p_y1_u1 * p_u2_u1 * p_y2_u2 , 
+            rm1m2 = p_m2_m1 + #"M1 -> M2" 
+              p_m1_u1 * p_u2_u1 * p_m2_u2 +#  "M1 <- U1 -> U2 -> M2" 
+              p_y1_m1 * p_m2_y1 + # "M1 -> Y1 -> M2"   
+              p_m1_u1 * p_y1_u1 * p_m2_y1,#"M1 <- U1 -> Y1 -> M2"
             rm1y2 = p_m2_m1*p_y2_m2 + 
               p_m1_u1*p_u2_u1*p_y2_u2 + 
               p_y1_m1*p_y2_y1 + 
@@ -158,16 +164,16 @@ grid1[,`:=`(rm2y2 = p_y2_m2 +
               p_y1_m1*p_m1_u1*p_u2_u1*p_m2_u2 +
               p_y1_u1*p_u2_u1*p_m2_u2 +
               p_m2_y1,
-            ry1y2 = p_y2_y1 +
-              p_y1_m1*p_m2_m1*p_y2_m2 + 
-              p_y1_m1*p_m1_u1*p_u2_u1*p_m2_u2*p_y2_m2 +
-              p_y1_m1*p_m1_u1*p_u2_u1*p_y2_u2 +
-              p_y1_u1*p_m1_u1*p_m2_m1*p_y2_m2 + 
-              p_y1_u1*p_u2_u1*p_y2_u2 + 
-              p_y1_u1*p_u2_u1*p_m2_u2*p_y2_m2 +
-               p_y1_m1 * p_y2_m1 +
-              p_y1_u1 * p_m1_u1 * p_m1_u1 * p_y2_m1 +
-            p_m2_y1 * p_y2_m2,
+            ry1y2 = p_y2_m2*p_m2_y1 + #Y1 -> M2 -> Y2"
+              p_y2_y1 +#"Y1 -> Y2"  
+              p_y2_m2*p_m2_m1*p_y1_m1 +#"Y1 <- M1 -> M2 -> Y2"   
+              p_y2_m1*p_y1_m1 +# "Y1 <- M1 -> Y2"    
+              p_y2_m2*p_m2_m1*p_m1_u1*p_y1_u1 +#"Y1 <- U -> M1 -> M2 -> Y2" 
+              p_y2_m1*p_m1_u1*p_y1_u1 +#"Y1 <- U -> M1 -> Y2" 
+              p_y2_m2*p_m2_u2 *p_u2_u1 *p_m1_u1*p_y1_m1 +#     "Y1 <- M1 <- U -> M2 -> Y2" 
+              p_y2_u2 *p_u2_u1 *p_m1_u1*p_y1_m1 +#"Y1 <- M1 <- U -> Y2"    
+              p_y2_m2*p_m2_u2 *p_u2_u1 *p_y1_u1 +# "Y1 <- U -> M2 -> Y2"      
+              p_y2_u2 *p_u2_u1 *p_y1_u1, #"Y1 <- U -> Y2",
             rm1y1 = p_y1_m1 + 
               p_m1_u1*p_y1_u1,
             rm1x = 0,
@@ -176,58 +182,57 @@ grid1[,`:=`(rm2y2 = p_y2_m2 +
             ry2x = p_m2_x*p_y2_m2 +
               p_y2_x,
             rgygm = 
-              p_gm_m1 * p_m2_m1 * p_y2_m2 * p_gy_y2 +                   # "GM <- M1 -> M2 -> Y2 -> GY"
-              p_gm_m1 * p_y1_m1 * p_gy_y1 +                             # "GM <- M1 -> Y1 -> GY"
-              p_gm_m1 * p_y1_m1 * p_m2_y1 * p_y2_m2 * p_gy_y2 +         # "GM <- M1 -> Y1 -> M2 -> Y2 -> GY"
-              p_gm_m1 * p_y1_m1 * p_y2_y1 * p_gy_y2 +                   # "GM <- M1 -> Y1 -> Y2 -> GY"
-              p_gm_m1 * p_y2_m1 * p_gy_y2 +                             # "GM <- M1 -> Y2 -> GY"
-              p_gm_m1 * p_m1_u1 * p_u2_u1 * p_m2_u2 * p_y2_m2 * p_gy_y2 +           # "GM <- M1 <- U -> M2 -> Y2 -> GY"
-              p_gm_m1 * p_m1_u1 * p_y1_u1 * p_gy_y1 +                     # "GM <- M1 <- U -> Y1 -> GY"
-              p_gm_m1 * p_m1_u1 * p_y1_u1 * p_m2_y1 * p_y2_m2 * p_gy_y2 + # "GM <- M1 <- U -> Y1 -> M2 -> Y2 -> GY"
-              p_gm_m1 * p_m1_u1 * p_y1_u1 * p_y2_y1 * p_gy_y2 +           # "GM <- M1 <- U -> Y1 -> Y2 -> GY"
-              p_gm_m1 * p_m1_u1 * p_u2_u1 * p_y2_u2 * p_gy_y2 +                     # "GM <- M1 <- U -> Y2 -> GY"
-              p_gm_m2 * p_y2_m2 * p_gy_y2 +                             # "GM <- M2 -> Y2 -> GY"
-              p_gm_m2 * p_m2_m1 * p_y1_m1 * p_gy_y1 +                   # "GM <- M2 <- M1 -> Y1 -> GY"
-              p_gm_m2 * p_m2_m1 * p_y1_m1 * p_y2_y1 * p_gy_y2 +         # "GM <- M2 <- M1 -> Y1 -> Y2 -> GY"
-              p_gm_m2 * p_m2_m1 * p_y2_m1 * p_gy_y2 +                   # "GM <- M2 <- M1 -> Y2 -> GY"
-              p_gm_m2 * p_m2_m1 * p_m1_u1 * p_y1_u1 * p_gy_y1 +           # "GM <- M2 <- M1 <- U -> Y1 -> GY"
-              p_gm_m2 * p_m2_m1 * p_m1_u1 * p_y1_u1 * p_y2_y1 * p_gy_y2 + # "GM <- M2 <- M1 <- U -> Y1 -> Y2 -> GY"
-              p_gm_m2 * p_m2_m1 * p_m1_u1 * p_u2_u1 * p_y2_u2 * p_gy_y2 +           # "GM <- M2 <- M1 <- U -> Y2 -> GY"
-              p_gm_m2 * p_m2_u2 * p_u2_u1 * p_m1_u1 * p_y1_m1 * p_gy_y1 +           # "GM <- M2 <- U -> M1 -> Y1 -> GY"
-              p_gm_m2 * p_m2_u2 * p_u2_u1 * p_m1_u1 * p_y1_m1 * p_y2_y1 * p_gy_y2 + # "GM <- M2 <- U -> M1 -> Y1 -> Y2 -> GY"
-              p_gm_m2 * p_m2_u2 * p_u2_u1 * p_m1_u1 * p_y2_m1 * p_gy_y2 +           # "GM <- M2 <- U -> M1 -> Y2 -> GY"
-              p_gm_m2 * p_m2_u2 * p_u2_u1 * p_y1_u1 * p_gy_y1 +                     # "GM <- M2 <- U -> Y1 -> GY"
-              p_gm_m2 * p_m2_u2 * p_u2_u1 * p_y1_u1 * p_y2_y1 * p_gy_y2 +           # "GM <- M2 <- U -> Y1 -> Y2 -> GY"
-              p_gm_m2 * p_m2_u2 * p_y2_u2 * p_gy_y2 +                     # "GM <- M2 <- U -> Y2 -> GY"
-              p_gm_m2 * p_m2_y1 * p_gy_y1 +                             # "GM <- M2 <- Y1 -> GY"
-              p_gm_m2 *  p_m2_y1 * p_y2_y1 * p_gy_y2 +                   # "GM <- M2 <- Y1 -> Y2 -> GY"
-              p_gm_m2 *  p_m2_y1 * p_y1_m1 * p_y2_m1 * p_gy_y2 +         # "GM <- M2 <- Y1 <- M1 -> Y2 -> GY"
-              p_gm_m2 *  p_m2_y1 * p_m1_u1 * p_u2_u1 * p_y2_u1 * p_gy_y2 +           # "GM <- M2 <- Y1 <- M1 <- U -> Y2 -> GY"
-              p_gm_m2 *  p_m2_y1 * p_y1_u1 * p_m1_u1 * p_y2_m1 * p_gy_y2 + # "GM <- M2 <- Y1 <- U -> M1 -> Y2 -> GY"
-              p_gm_m2 *  p_m2_y1 * p_y1_u1 * p_u2_u1 * p_y2_u1 * p_gy_y2 + # "GM <- M2 <- Y1 <- U -> Y2 -> GY"
-              p_gm_m2 *  p_m2_x * p_y2_x * p_gy_y2
-            ,
+              p_gy_y2 * p_y2_m2 * p_m2_m1 * p_gm_m1 +
+              p_gy_y1 * p_y1_m1 * p_gm_m1 +
+              p_gy_y2 * p_y2_m2 * p_m2_y1 * p_y1_m1 * p_gm_m1 +
+              p_gy_y2 * p_y2_y1 * p_y1_m1 * p_gm_m1 +
+              p_gy_y2 * p_y2_m1 * p_gm_m1 +
+              p_gy_y2 * p_y2_m2 * p_m2_u2 * p_u2_u1 * p_m1_u1 * p_gm_m1 +
+              p_gy_y2 * p_y2_u2 * p_u2_u1 * p_m1_u1 * p_gm_m1 +
+              p_gy_y1 * p_y1_u1 * p_gm_m1 +
+              p_gy_y2 * p_y2_m2 * p_m2_y1 * p_y1_u1 * p_gm_m1 +
+              p_gy_y2 * p_y2_y1 * p_y1_u1 * p_gm_m1 +
+              p_gy_y2 * p_y2_m2 * p_gm_m2 +
+              p_gy_y1 * p_y1_m1 * p_m2_m1 * p_gm_m2 +
+              p_gy_y2 * p_y2_y1 * p_y1_m1 * p_m2_m1 * p_gm_m2 +
+              p_gy_y2 * p_y2_m1 * p_m2_m1 * p_gm_m2 +
+              p_gy_y2 * p_y2_u2 * p_u2_u1 * p_m1_u1 * p_m2_m1 * p_gm_m2 +
+              p_gy_y1 * p_y1_u1 * p_m2_m1 * p_gm_m2 +
+              p_gy_y2 * p_y2_y1 * p_y1_u1 * p_m2_m1 * p_gm_m2 +
+              p_gy_y2 * p_y2_u2 * p_m2_u2 * p_gm_m2 +
+              p_gy_y1 * p_y1_m1 * p_u2_u1 * p_m2_u2 * p_gm_m2 +
+              p_gy_y2 * p_y2_y1 * p_y1_m1 * p_u2_u1 * p_m2_u2 * p_gm_m2 +
+              p_gy_y2 * p_y2_m1 * p_u2_u1 * p_m2_u2 * p_gm_m2 +
+              p_gy_y1 * p_y1_u1 * p_u2_u1 * p_m2_u2 * p_gm_m2 +
+              p_gy_y2 * p_y2_y1 * p_y1_u1 * p_u2_u1 * p_m2_u2 * p_gm_m2 +
+              p_gy_y2 * p_y2_x * p_m2_x * p_gm_m2 +
+              p_gy_y1 * p_m2_y1 * p_gm_m2 +
+              p_gy_y2 * p_y2_y1 * p_m2_y1 * p_gm_m2 +
+              p_gy_y2 * p_y2_m1 * p_m2_y1 * p_gm_m2 +
+              p_gy_y2 * p_y2_u2 * p_u2_u1 * p_m1_u1 * p_m2_y1 * p_gm_m2 +
+              p_gy_y2 * p_y2_m1 * p_m1_u1 * p_y1_u1 * p_gm_m2 +
+              p_gy_y2 * p_y2_u2 * p_u2_u1 * p_m2_y1 * p_gm_m2 ,
             rgym2 = 
-              p_y2_m2 * p_gy_y2 +                                         # "M2 -> Y2 -> GY"
-              p_m2_m1 * p_y1_m1 * p_gy_y1 +                               # "M2 <- M1 -> Y1 -> GY"
-              p_m2_m1 * p_y1_m1 * p_y2_y1 * p_gy_y2 +                     # "M2 <- M1 -> Y1 -> Y2 -> GY"
-              p_m2_m1 * p_y2_m1 * p_gy_y2 +                               # "M2 <- M1 -> Y2 -> GY"
-              p_m2_m1 * p_m1_u1 * p_y1_u1 * p_gy_y1 +                       # "M2 <- M1 <- U -> Y1 -> GY"
-              p_m2_m1 * p_m1_u1 * p_y1_u1 * p_y2_y1 * p_gy_y2 +             # "M2 <- M1 <- U -> Y1 -> Y2 -> GY"
-              p_m2_m1 * p_m1_u1 * p_y2_u1 * p_gy_y2 +                       # "M2 <- M1 <- U -> Y2 -> GY"
-              p_m2_u2 * p_u2_u1 * p_m1_u1 * p_y1_m1 * p_gy_y1 +                       # "M2 <- U -> M1 -> Y1 -> GY"
-              p_m2_u2 * p_u2_u1 * p_m1_u1 * p_y1_m1 * p_y2_y1 * p_gy_y2 +             # "M2 <- U -> M1 -> Y1 -> Y2 -> GY"
-              p_m2_u2 * p_u2_u1 * p_m1_u1 * p_y2_m1 * p_gy_y2 +                       # "M2 <- U -> M1 -> Y2 -> GY"
-              p_m2_u2 * p_u2_u1 * p_y1_u1 * p_gy_y1 +                                 # "M2 <- U -> Y1 -> GY"
-              p_m2_u2 * p_u2_u1 * p_y1_u1 * p_y2_y1 * p_gy_y2 +                       # "M2 <- U -> Y1 -> Y2 -> GY"
-              p_m2_u2 * p_y2_u2 * p_gy_y2 +                                 # "M2 <- U -> Y2 -> GY"
-              p_m2_y1 * p_gy_y1 +                                         # "M2 <- Y1 -> GY"
-              p_m2_y1 * p_y2_y1 * p_gy_y2 +                               # "M2 <- Y1 -> Y2 -> GY"
-              p_m2_y1 * p_y1_m1 * p_y2_m1 * p_gy_y2 +                     # "M2 <- Y1 <- M1 -> Y2 -> GY"
-              p_m2_y1 * p_m1_u1 * p_u2_u1 * p_y2_u2 * p_gy_y2 +                       # "M2 <- Y1 <- M1 <- U -> Y2 -> GY"
-              p_m2_y1 * p_y1_u1 * p_m1_u1 * p_y2_m1 * p_gy_y2 +             # "M2 <- Y1 <- U -> M1 -> Y2 -> GY"
-              p_m2_y1 * p_y1_u1 + p_u2_u1 * p_y2_u1 * p_gy_y2 +
-              p_m2_x * p_y2_x * p_gy_y2,
+              p_gy_y2 * p_y2_m2 +
+              p_gy_y1 * p_y1_m1 * p_m2_m1 +
+              p_gy_y2 * p_y2_y1 * p_y1_m1 * p_m2_m1 +
+              p_gy_y2 * p_y2_m1 * p_m2_m1 +
+              p_gy_y2 * p_y2_u2 * p_u2_u1 * p_m1_u1 * p_m2_m1 +
+              p_gy_y1 * p_y1_u1 * p_m2_m1 +
+              p_gy_y2 * p_y2_y1 * p_y1_u1 * p_m2_m1 +
+              p_gy_y2 * p_y2_u2 * p_m2_u2 +
+              p_gy_y1 * p_y1_m1 * p_m1_u1 * p_u2_u1 * p_m2_u2 +
+              p_gy_y2 * p_y2_y1 * p_y1_m1 * p_m1_u1 * p_u2_u1 * p_m2_u2 +
+              p_gy_y2 * p_y2_m1 * p_m1_u1 * p_u2_u1 * p_m2_u2 +
+              p_gy_y1 * p_y1_u1 * p_u2_u1 * p_m2_u2 +
+              p_gy_y2 * p_y2_y1 * p_y1_u1 * p_u2_u1 * p_m2_u2 +
+              p_gy_y2 * p_y2_x * p_m2_x +
+              p_gy_y1 * p_m2_y1 +
+              p_gy_y2 * p_y2_y1 * p_m2_y1 +
+              p_gy_y2 * p_y2_m1 * p_m2_y1 +
+              p_gy_y2 * p_y2_u2 * p_u2_u1 * p_m1_u1 * p_m2_y1 +
+              p_gy_y2 * p_y2_m1 * p_m1_u1 * p_y1_u1 * p_m2_y1 +
+              p_gy_y2 * p_y2_u2 * p_u2_u1 * p_m2_y1,
             rgyx = p_gy_y2*p_y2_m2*p_m2_x+
               p_gy_y2*p_y2_x,
             rgmx = p_gm_m2*p_m2_x )]
