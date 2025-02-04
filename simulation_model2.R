@@ -23,9 +23,9 @@ library(cgwtools)
 library(forestmangr)
 library(dendroTools)
 
-#### analytic bias from u
+#### analytic bias from u1, u2
 #### 7 grid points will only run on supercomputer
-#### 9 grid points yield similar results
+
 ng <- list()
 ng <- append(.1, ng)
 ng <- append(sqrt(ng[[1]]),ng)
