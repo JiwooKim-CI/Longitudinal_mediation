@@ -314,6 +314,7 @@ grid1[,`:=`(bias_change = change - truth, ### 2 wave change score that people us
             bias_ancova = ancova - truth,
             bias_naive = naive - truth,
             bias_change_1 = change_1 - truth)] ### change score with one pre-test (outcome)
+# add the column showing the degree of violation of the ignorability assumption
 grid1$diff <- abs(grid1$p_m2_u*grid1$p_y2_u)
 
 grid1 <- grid1[,-(13:42)] # Remove unnecessary columns for faster simulation
