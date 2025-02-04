@@ -290,25 +290,22 @@ grid1[,`:=`(change = p_m2_x*bgygm_x/(2-2*rm1m2_x),
             ancova = p_m2_x*bm2y2_xm1y1 ,
             truth = p_m2_x*p_y2_m2,
             naive =p_m2_x*by2m2_x)]
-#grid1<-grid1 |>
-#  filter(if_all(c("change", "change_2","change_1","ancova","naive"), ~ abs(.) <= 1))
-range(grid1$ancova)
-# Convert to a tibble for better display if desired
 
 # computing bias
-grid1[,`:=`(bias_change = change - truth, ### 2 wave change score that ppl usually use
-            bias_change_2 = change_2 - truth, ### 2 wave change score divided by 2
+grid1[,`:=`(bias_change = change - truth,
+            bias_change_2 = change_2 - truth,
             bias_ancova = ancova - truth,
             bias_naive = naive - truth,
-            bias_change_1 = change_1 - truth)] ### change score with one pre-test
+            bias_change_1 = change_1 - truth)]
+# add the column showing the degree of violation of the ignorability assumption
+grid1$diff <- abs(grid1$p_m2_u2*grid1$p_y2_u2)
 
-grid1 <- grid1[,-(16:37)]
-
-grid1[,16:20] <- round_df(grid1[,16:20], 4)
-grid1$Min_1 <- colnames(grid1[,16:19])[minCol(abs(grid1[,16:19]), ties.method = "first")]
-grid1$Min_2 <- colnames(grid1[,16:19])[minCol(abs(grid1[,16:19]), ties.method = "last")]
+grid1 <- grid1[,-(18:58)]
+colnames(grid1)
+grid1[,17:28] <- round_df(grid1[,17:28],4)
+grid1$Min_1 <- colnames(grid1[,24:28])[minCol(abs(grid1[,24:28]), ties.method = "first")]
+grid1$Min_2 <- colnames(grid1[,24:28])[minCol(abs(grid1[,24:28]), ties.method = "last")]
 grid1<- grid1 |> mutate(Min = ifelse(Min_1 != Min_2, "Tie", Min_1))
-
 
 ####### Save data
 
@@ -319,53 +316,67 @@ graph1 <- grid1$bias_ancova |>
   as_tibble()
 
 graph1_ancova <- graph1 |>  # Group by all columns
-  group_by(value) |>
+  group_by(value, diff) |>
   count()
 graph1_ancova <- graph1_ancova |>
   mutate(perc = n/nrow(graph1))
-write.csv(graph1_ancova,"ancova_1.csv")
+write.csv(graph1_ancova,"ancova_2_1.csv")
 
 graph1 <- grid1$bias_change |>
   as_tibble()
 
 graph1_change <- graph1 |>  # Group by all columns
-  group_by(value) |>
+  group_by(value, diff) |>
   count()
 graph1_change <- graph1_change|>
   mutate(perc = n/nrow(graph1))
 
-write.csv(graph1_change,"change_1.csv")
+write.csv(graph1_change,"change_2_1.csv")
 
 graph1 <- grid1$bias_change_2 |>
   as_tibble()
 
 graph1_change2 <- graph1 |>  # Group by all columns
-  group_by(value) |>
+  group_by(value, diff) |>
   count()
 graph1_change2 <- graph1_change2|>
   mutate(perc = n/nrow(graph1))
 
-write.csv(graph1_change2,"change2_1.csv")
+write.csv(graph1_change2,"change2_2_1.csv")
 
 graph1 <- grid1$bias_naive |>
   as_tibble()
 graph1_naive <- graph1 |>  # Group by all columns
-  group_by(value) |>
+  group_by(value, diff) |>
   count()
 graph1_naive<- graph1_naive |>
   mutate(perc = n/nrow(graph1))
 
-write.csv(graph1_naive,"naive_1.csv")
+write.csv(graph1_naive,"naive_2_1.csv")
 
-grid1small1 <- grid1 |> filter(p_m1_u1 == p_u2_u1*p_m2_u2 + p_m1_u1*p_m2_m1 &
-                                 p_y1_u1 == p_u2_u1*p_y2_u2 + p_y1_u1*p_y2_y1&
-                                 p_y1_m1 == 0 &
-                                p_y2_m1 == 0&
-                               p_m2_y1 == 0)
-                               
+graph1 <- grid1$bias_change_1 |>
+  as_tibble()
+
+graph1_change1 <- graph1 |>  # Group by all columns
+  group_by(value, diff) |>
+  count()
+graph1_change1 <- graph1_change1|>
+  mutate(perc = n/nrow(graph1))
+
+write.csv(graph1_change1,"change1_2_1.csv")
+
+grid1small1 <- grid1 |> filter(p_y1_u1 + p_m1_u1*p_y1_m1== p_y2_u2*p_u2_u1+p_y1_u1*p_y2_y1+
+                                 p_m1_u1*p_y2_m1+p_m1_u1*p_y1_m1*p_y2_y1&
+                                 p_y1_m1 + p_y1_u1*p_m1_u1 ==
+                                 p_y1_m1*p_y2_y1 + p_y2_m1 + p_m1_u1*p_y1_u1*p_y2_y1+
+                                 p_m1_u1*p_u2_u1*p_y2_u2 &
+                                 p_m2_y1 == 0)
 
 
 #overlaid densities of both biases
+
+
+
 graph1 <- grid1small1$bias_ancova |>
   as_tibble()
 
@@ -374,7 +385,7 @@ graph1_ancova <- graph1 |>  # Group by all columns
   count()
 graph1_ancova <- graph1_ancova |>
   mutate(perc = n/nrow(graph1))
-write.csv(graph1_ancova,"ancova_2_1.csv")
+write.csv(graph1_ancova,"ancova_2_1_c.csv")
 
 graph1 <- grid1small1$bias_change |>
   as_tibble()
@@ -385,7 +396,7 @@ graph1_change <- graph1 |>  # Group by all columns
 graph1_change <- graph1_change|>
   mutate(perc = n/nrow(graph1))
 
-write.csv(graph1_change,"change_2_1.csv")
+write.csv(graph1_change,"change_2_1_c.csv")
 
 graph1 <- grid1small1$bias_change_2 |>
   as_tibble()
@@ -396,7 +407,7 @@ graph1_change2 <- graph1 |>  # Group by all columns
 graph1_change2 <- graph1_change2|>
   mutate(perc = n/nrow(graph1))
 
-write.csv(graph1_change2,"change2_2_1.csv")
+write.csv(graph1_change2,"change2_2_1_c.csv")
 
 graph1 <- grid1small1$bias_naive |>
   as_tibble()
@@ -406,4 +417,67 @@ graph1_naive <- graph1 |>  # Group by all columns
 graph1_naive<- graph1_naive |>
   mutate(perc = n/nrow(graph1))
 
-write.csv(graph1_naive,"naive_2_1.csv")
+write.csv(graph1_naive,"naive_2_1_c.csv")
+
+graph1 <- grid1$bias_change_1 |>
+  as_tibble()
+
+graph1_change1 <- graph1 |>  # Group by all columns
+  group_by(value) |>
+  count()
+graph1_change1 <- graph1_change1|>
+  mutate(perc = n/nrow(graph1))
+write.csv(graph1_change1,"change1_2_1_c.csv")
+
+grid1small1 <- grid1 |> filter(grid1$p_m2_u2* grid1$p_y2_u2==0)
+graph1 <- grid1small1$bias_ancova |>
+  as_tibble()
+
+graph1_ancova <- graph1 |>  # Group by all columns
+  group_by(value) |>
+  count()
+graph1_ancova <- graph1_ancova |>
+  mutate(perc = n/nrow(graph1))
+write.csv(graph1_ancova,"ancova_2_1_i.csv")
+
+graph1 <- grid1small1$bias_change |>
+  as_tibble()
+
+graph1_change <- graph1 |>  # Group by all columns
+  group_by(value) |>
+  count()
+graph1_change <- graph1_change|>
+  mutate(perc = n/nrow(graph1))
+
+write.csv(graph1_change,"change_2_1_i.csv")
+
+graph1 <- grid1small1$bias_change_2 |>
+  as_tibble()
+
+graph1_change2 <- graph1 |>  # Group by all columns
+  group_by(value) |>
+  count()
+graph1_change2 <- graph1_change2|>
+  mutate(perc = n/nrow(graph1))
+
+write.csv(graph1_change2,"change2_2_1_i.csv")
+
+graph1 <- grid1small1$bias_naive |>
+  as_tibble()
+graph1_naive <- graph1 |>  # Group by all columns
+  group_by(value) |>
+  count()
+graph1_naive<- graph1_naive |>
+  mutate(perc = n/nrow(graph1))
+
+write.csv(graph1_naive,"naive_2_1_i.csv")
+
+graph1 <- grid1$bias_change_1 |>
+  as_tibble()
+
+graph1_change1 <- graph1 |>  # Group by all columns
+  group_by(value) |>
+  count()
+graph1_change1 <- graph1_change1|>
+  mutate(perc = n/nrow(graph1))
+write.csv(graph1_change1,"change1_2_1_i.csv")
