@@ -6,8 +6,8 @@ library(profvis)
 library(tictoc)
 library(plyr)
 library(doParallel)
-#cl<-49
-#registerDoParallel(cl)
+cl<-49
+registerDoParallel(cl)
 library(dagitty) # to draw DAGs
 library(raster)
 library(ggplot2)
