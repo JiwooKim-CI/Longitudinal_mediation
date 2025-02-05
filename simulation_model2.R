@@ -375,7 +375,10 @@ grid1small1 <- grid1 |> filter(p_y1_u1 + p_m1_u1*p_y1_m1== p_y2_u2*p_u2_u1+p_y1_
                                  p_y1_m1 + p_y1_u1*p_m1_u1 ==
                                  p_y1_m1*p_y2_y1 + p_y2_m1 + p_m1_u1*p_y1_u1*p_y2_y1+
                                  p_m1_u1*p_u2_u1*p_y2_u2 &
-                                 p_m2_y1 == 0)
+                                 p_m2_y1 == 0 & 
+                                p_u2_u1 * p_y1_u1 + p_u2_u1 * p_m1_u1 * p_y1_m1 == 
+                               p_u2_u1 * p_y1_u1 * p_y2_y1 + 
+                               p_u2_u1 * p_m1_u1 * p_y1_m1 * p_y2_y1 + p_u2_y1 + p_u2_u1 * p_m1_u1 * p_y2_m1)
 
 
 #overlaid densities of both biases
