@@ -484,3 +484,5 @@ graph1_change1 <- graph1 |>  # Group by all columns
 graph1_change1 <- graph1_change1|>
   mutate(perc = n/nrow(graph1))
 write.csv(graph1_change1,"change1_2_1_i.csv")
+
+stopCluster(cl)
