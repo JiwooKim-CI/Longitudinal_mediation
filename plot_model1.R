@@ -47,7 +47,7 @@ new_sim1 <- ggplot(graph1, aes(x = method, y = value, fill = method, weight = pe
   theme_apa()
 
 # Save plots
-tikz("new_sim1.tex", width = 5.5, height = 5, standAlone = FALSE)
+tikz("new_sim1.tex", width = 5.5, height = 5, standAlone = TRUE)
 new_sim1
 dev.off()
 
@@ -78,7 +78,7 @@ new_sim2 <- ggplot(graph2, aes(x = method, y = value, fill = method, weight = pe
   theme_apa()
 
 # Save plots
-tikz("new_sim2.tex", width = 5.5, height = 5, standAlone = FALSE)
+tikz("new_sim2.tex", width = 5.5, height = 5, standAlone = TRUE)
 new_sim2
 dev.off()
 
@@ -109,7 +109,7 @@ new_sim3 <- ggplot(graph3, aes(x = method, y = value, fill = method, weight = pe
   theme_apa()
 
 # Save plots
-tikz("new_sim3.tex", width = 5.5, height = 5, standAlone = FALSE)
+tikz("new_sim3.tex", width = 5.5, height = 5, standAlone = TRUE)
 new_sim3
 dev.off()
 
@@ -170,7 +170,7 @@ model_1_ig <- ggplot(combined_data, aes(x = diff, y = abs(value), color = method
   labs(x = "Violation of Ignorability Assumption", y = "Bias")
 
 # Save plot
-tikz("sim_1_ig.tex", height = 6, width = 6)
+tikz("sim_1_ig.tex", height = 6, width = 6, standAlone = TRUE)
 model_1_ig
 dev.off()
 
