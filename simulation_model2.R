@@ -6,7 +6,7 @@ library(profvis)
 library(tictoc)
 library(plyr)
 library(doParallel)
-cl<-49
+cl <- 49
 registerDoParallel(cl)
 library(dagitty) # to draw DAGs
 library(raster)
@@ -294,7 +294,7 @@ grid1[,`:=`(change = p_m2_x*bgygm_x/(2-2*rm1m2_x),
             change_1 = p_m2_x*bgym2_x,
             ancova = p_m2_x*bm2y2_xm1y1 ,
             truth = p_m2_x*p_y2_m2,
-            naive =p_m2_x*by2m2_x)]
+            naive = p_m2_x*by2m2_x)]
 
 # computing bias
 grid1[,`:=`(bias_change = change - truth,
@@ -303,7 +303,7 @@ grid1[,`:=`(bias_change = change - truth,
             bias_naive = naive - truth,
             bias_change_1 = change_1 - truth)]
 # add the column showing the degree of violation of the ignorability assumption
-grid1$diff <- abs(grid1$p_m2_u2*grid1$p_y2_u2)
+grid1$diff <- abs(grid1$p_m2_u2 * grid1$p_y2_u2)
 
 grid1 <- grid1[,-(18:58)]
 colnames(grid1)
@@ -313,8 +313,8 @@ grid1$Min_2 <- colnames(grid1[,24:28])[minCol(abs(grid1[,24:28]), ties.method = 
 grid1<- grid1 |> mutate(Min = ifelse(Min_1 != Min_2, "Tie", Min_1))
 
 ####### Save data
-
-# Graph under the time varying confounder
+## Data was generated using virtual machine and analyzed using local computer considering the dataset's huge size
+## and to reduce the time used for virtual machine
 
 # save dataset
 graph1 <- grid1$bias_ancova |>
@@ -370,20 +370,15 @@ graph1_change1 <- graph1_change1|>
 
 write.csv(graph1_change1,"change1_2_1.csv")
 
-grid1small1 <- grid1 |> filter(p_y1_u1 + p_m1_u1*p_y1_m1== p_y2_u2*p_u2_u1+p_y1_u1*p_y2_y1+
-                                 p_m1_u1*p_y2_m1+p_m1_u1*p_y1_m1*p_y2_y1&
-                                 p_y1_m1 + p_y1_u1*p_m1_u1 ==
-                                 p_y1_m1*p_y2_y1 + p_y2_m1 + p_m1_u1*p_y1_u1*p_y2_y1+
-                                 p_m1_u1*p_u2_u1*p_y2_u2 &
+grid1small1 <- grid1 |> filter(p_y1_u1 + p_m1_u1 * p_y1_m1 == p_y2_u2 * p_u2_u1 + p_y1_u1 * p_y2_y1 +
+                                 p_m1_u1 * p_y2_m1 + p_m1_u1 * p_y1_m1 * p_y2_y1 &
+                                 p_y1_m1 + p_y1_u1 * p_m1_u1 ==
+                                 p_y1_m1 * p_y2_y1 + p_y2_m1 + p_m1_u1 * p_y1_u1 * p_y2_y1 +
+                                 p_m1_u1 * p_u2_u1 * p_y2_u2 &
                                  p_m2_y1 == 0 & 
-                                p_u2_u1 * p_y1_u1 + p_u2_u1 * p_m1_u1 * p_y1_m1 == 
-                               p_u2_u1 * p_y1_u1 * p_y2_y1 + 
-                               p_u2_u1 * p_m1_u1 * p_y1_m1 * p_y2_y1 + p_u2_u1 * p_m1_u1 * p_y2_m1)
-
-
-#overlaid densities of both biases
-
-
+                                 p_u2_u1 * p_y1_u1 + p_u2_u1 * p_m1_u1 * p_y1_m1 == 
+                                 p_u2_u1 * p_y1_u1 * p_y2_y1 + 
+                                 p_u2_u1 * p_m1_u1 * p_y1_m1 * p_y2_y1 + p_u2_u1 * p_m1_u1 * p_y2_m1)
 
 graph1 <- grid1small1$bias_ancova |>
   as_tibble()
@@ -437,7 +432,7 @@ graph1_change1 <- graph1_change1|>
   mutate(perc = n/nrow(graph1))
 write.csv(graph1_change1,"change1_2_1_c.csv")
 
-grid1small1 <- grid1 |> filter(grid1$p_m2_u2* grid1$p_y2_u2==0)
+grid1small1 <- grid1 |> filter(grid1$p_m2_u2 * grid1$p_y2_u2==0)
 graph1 <- grid1small1$bias_ancova |>
   as_tibble()
 
