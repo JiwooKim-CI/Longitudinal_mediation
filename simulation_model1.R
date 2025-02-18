@@ -5,7 +5,7 @@
 library(tictoc)
 library(plyr)
 library(doParallel)
-cl<-49
+cl <- 49
 registerDoParallel(cl)
 library(dagitty) 
 library(ggplot2)
@@ -132,7 +132,7 @@ grid1[,`:=`(eps_m1 = sqrt(1-p_m1_u^2),
                             2*p_y2_m2*p_m2_x*p_y2_x))]
 
 
-grid1 <- grid[eps_m1>=0 & eps_y1>=0 & eps_m2>=0 & eps_y2>=0]
+grid1 <- grid[eps_m1 >= 0 & eps_y1 >= 0 & eps_m2 >= 0 & eps_y2 >= 0]
 
 
 # computing estimators
@@ -297,25 +297,25 @@ grid1 <- grid1[!(abs(rm2y2) > 1 |
                    abs(rxm2_m1y1) > 1|
                    abs(rm2y2_xm1y1)>1)]
 
-grid1[,`:=`(change = p_m2_x*bgygm_x/(2-2*rm1m2_x),
-            change_2 = p_m2_x*bgygm_x/(1-rm1m2_x),
-            change_1 = p_m2_x*bgym2_x,
-            ancova = p_m2_x*bm2y2_xm1y1 ,
-            truth = p_m2_x*p_y2_m2,
-            naive =p_m2_x*by2m2_x)]
+grid1[,`:=`(change = p_m2_x * bgygm_x / (2 - 2 * rm1m2_x),
+            change_2 = p_m2_x * bgygm_x / (1 - rm1m2_x),
+            change_1 = p_m2_x * bgym2_x,
+            ancova = p_m2_x * bm2y2_xm1y1 ,
+            truth = p_m2_x * p_y2_m2,
+            naive =p_m2_x * by2m2_x)]
 
 range(grid1$ancova)
 
 # Convert to a tibble for better display if desired
 
 # computing bias
-grid1[,`:=`(bias_change = change - truth, ### 2 wave change score that people usually use
-            bias_change_2 = change_2 - truth, ### 2 wave change score multiplied by 2
+grid1[,`:=`(bias_change = change - truth, ### change(F)
+            bias_change_2 = change_2 - truth, ### change(A)
             bias_ancova = ancova - truth,
             bias_naive = naive - truth,
-            bias_change_1 = change_1 - truth)] ### change score with one pre-test (outcome)
+            bias_change_1 = change_1 - truth)] ### change(D)
 # add the column showing the degree of violation of the ignorability assumption
-grid1$diff <- abs(grid1$p_m2_u*grid1$p_y2_u)
+grid1$diff <- abs(grid1$p_m2_u * grid1$p_y2_u)
 
 grid1 <- grid1[,-(13:42)] # Remove unnecessary columns for faster simulation
 
@@ -326,8 +326,8 @@ grid1<- grid1 |> mutate(Min = ifelse(Min_1 != Min_2, "Tie", Min_1))
 
 
 ####### Save data
-
-# Graph under the no time varying confounder assumption only
+## Data was generated using virtual machine and analyzed using local computer considering the dataset's huge size
+## and to reduce the time used for virtual machine
 
 # save dataset
 graph1 <- grid1 |>
@@ -359,8 +359,6 @@ graph1_change1 <- graph1 |>  # Group by all columns
   group_by(bias_change_1, diff) |>
   count()
 
-
-
 graph1 <- grid1 |>
   select(bias_change_2, diff) |>
   as_tibble() |>
@@ -370,15 +368,14 @@ graph1_change_2 <- graph1 |>  # Group by all columns
   group_by(bias_change_2, diff) |>
   count()
 
-
 graph1 <- grid1 |>
   select(bias_change_1, diff) |>
   as_tibble() |>
   round_df(4)
+
 graph1_change_1 <- graph1 |>  # Group by all columns
   group_by(bias_change_1, diff) |>
   count()
-
 
 graph1 <- grid1 |>
   select(bias_naive,diff) |>
@@ -391,12 +388,12 @@ graph1_naive <- graph1 |>  # Group by all columns
 graph1_naive<- graph1_naive |>
   mutate(perc = n/nrow(graph1))
 
-write.csv(graph1_ancova,"ancova_sim1_r1.csv")
-write.csv(graph1_change,"change_sim1_r1.csv")
-write.csv(graph1_change1,"change1_sim1_r1.csv")
-write.csv(graph1_change_2,"change2_sim1_r1.csv")
-write.csv(graph1_naive,"naive_sim1_r1.csv")
-write.csv(graph1_change_1,"change1_sim1_r1.csv")
+write.csv(graph1_ancova,"ancova_sim1_1.csv")
+write.csv(graph1_change,"change_sim1_1.csv")
+write.csv(graph1_change1,"change1_sim1_1.csv")
+write.csv(graph1_change_2,"change2_sim1_1.csv")
+write.csv(graph1_naive,"naive_sim1_1.csv")
+write.csv(graph1_change_1,"change1_sim1_1.csv")
 
 
 
@@ -428,8 +425,6 @@ graph1_change <- graph1 |>  # Group by all columns
   group_by(bias_change) |>
   count()
 
-
-
 graph1 <- grid1small1 |>
   select(bias_change_1) |>
   as_tibble() |>
@@ -449,8 +444,6 @@ graph1_change_2 <- graph1 |>  # Group by all columns
   group_by(bias_change_2) |>
   count()
 
-
-
 graph1 <- grid1small1 |>
   select(bias_naive) |>
   as_tibble() |>
@@ -460,14 +453,14 @@ graph1_naive <- graph1 |>  # Group by all columns
   group_by(bias_naive) |>
   count()
 
-write.csv(graph1_ancova,"ancova_sim1_rc.csv")
-write.csv(graph1_change,"change_sim1_rc.csv")
-write.csv(graph1_change_2,"change2_sim1_rc.csv")
-write.csv(graph1_change_1,"change1_sim1_rc.csv")
-write.csv(graph1_naive,"naive_sim1_rc.csv")
+write.csv(graph1_ancova,"ancova_sim1_c.csv")
+write.csv(graph1_change,"change_sim1_c.csv")
+write.csv(graph1_change_2,"change2_sim1_c.csv")
+write.csv(graph1_change_1,"change1_sim1_c.csv")
+write.csv(graph1_naive,"naive_sim1_c.csv")
 
-grid1small1 <- grid1 |> filter(grid1$p_m2_u*
-                                 grid1$p_y2_u==0)
+grid1small1 <- grid1 |> filter(grid1$p_m2_u *
+                                 grid1$p_y2_u == 0)
 range(grid1small1$bias_ancova)
 range(grid1small1$diff2)
 graph1 <- grid1small1 |>
@@ -479,7 +472,6 @@ graph1_ancova <- graph1 |>  # Group by all columns
   group_by(bias_ancova) |>
   count()
 
-
 graph1 <- grid1small1 |>
   select(bias_change) |>
   as_tibble() |>
@@ -488,8 +480,6 @@ graph1 <- grid1small1 |>
 graph1_change <- graph1 |>  # Group by all columns
   group_by(bias_change) |>
   count()
-
-
 
 graph1 <- grid1small1 |>
   select(bias_change_1) |>
@@ -500,7 +490,6 @@ graph1_change_1 <- graph1|> # Group by all columns
   group_by(bias_change_1) |>
   count()
 
-
 graph1 <- grid1small1 |>
   select(bias_change_2) |>
   as_tibble() |>
@@ -509,8 +498,6 @@ graph1 <- grid1small1 |>
 graph1_change_2 <- graph1 |>  # Group by all columns
   group_by(bias_change_2) |>
   count()
-
-
 
 graph1 <- grid1small1 |>
   select(bias_naive) |>
@@ -521,10 +508,10 @@ graph1_naive <- graph1 |>  # Group by all columns
   group_by(bias_naive) |>
   count()
 
-write.csv(graph1_ancova,"ancova_sim1_ri.csv")
-write.csv(graph1_change,"change_sim1_ri.csv")
-write.csv(graph1_change_2,"change2_sim1_ri.csv")
-write.csv(graph1_change_1,"change1_sim1_ri.csv")
-write.csv(graph1_naive,"naive_sim1_ri.csv")
+write.csv(graph1_ancova,"ancova_sim1_i.csv")
+write.csv(graph1_change,"change_sim1_i.csv")
+write.csv(graph1_change_2,"change2_sim1_i.csv")
+write.csv(graph1_change_1,"change1_sim1_i.csv")
+write.csv(graph1_naive,"naive_sim1_i.csv")
 
 stopCluster(cl)
