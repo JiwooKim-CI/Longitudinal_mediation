@@ -15,9 +15,11 @@ Files:
 - simulation_model2.R
 - plot_model1.R
 - plot_model2.R
+- derivation.R
 
 The simulation_model1.R file contains code under the assumption of no time-varying confounders, while the simulation_model2.R file includes code with time-varying confounders. 
 The plot_model1.R and plot_model2.R files are for generating plots using dataset from both models.
+The derivation.R file contains the code for deriving the estimation of the ANCOVA model mentioned in Appendix B.
 All datasets used in the analysis are generated through simulations; therefore, there is no external source for the dataset.
 
 ## Reproducibility
