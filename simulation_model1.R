@@ -297,9 +297,36 @@ grid1 <- grid1[!(abs(rm2y2) > 1 |
                    abs(rxm2_m1y1) > 1|
                    abs(rm2y2_xm1y1)>1)]
 
-grid1[,`:=`(change = p_m2_x * bgygm_x / (2 - 2 * rm1m2_x),
-            change_2 = p_m2_x * bgygm_x / (1 - rm1m2_x),
-            change_1 = p_m2_x * bgym2_x,
+# Variance of raw mediator change conditional on X
+grid1[, var_dm_x :=
+        2 - 2 * rm1m2 - (rm2x - rm1x)^2]
+
+# Covariance between the two raw change scores conditional on X
+grid1[, cov_dy_dm_x :=
+        (rm2y2 - rm1y2 - ry1m2 + rm1y1) -
+        (ry2x - ry1x) * (rm2x - rm1x)]
+
+# Variance of M2 conditional on X
+grid1[, var_m2_x :=
+        1 - rm2x^2]
+
+# Covariance between Delta Y and M2 conditional on X
+grid1[, cov_dy_m2_x :=
+        (rm2y2 - ry1m2) -
+        (ry2x - ry1x) * rm2x]
+
+# Remove parameter combinations producing invalid conditional variances
+grid1 <- grid1[
+  var_dm_x > 1e-10 &
+  var_m2_x > 1e-10
+]
+
+grid1[,`:=`(change = (rm2x - rm1x) *
+        cov_dy_dm_x / var_dm_x,
+            change_2 = 
+        2 * change,
+            change_1 = rm2x *
+        cov_dy_m2_x / var_m2_x,
             ancova = p_m2_x * bm2y2_xm1y1 ,
             truth = p_m2_x * p_y2_m2,
             naive =p_m2_x * by2m2_x)]
